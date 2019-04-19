@@ -1,0 +1,38 @@
+{
+  "name": "mongad",
+  "version": "0.0.1",
+  "description": "A monadic wrapper for MongoDB",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "keywords": [
+    "mongo",
+    "db",
+    "monads",
+    "functional"
+  ],
+  "author": "Malte Sellmer",
+  "license": "ISC",
+  "peerDependencies": {
+    "mongodb": "^3.2.3"
+  },
+  "devDependencies": {
+    "@types/jest": "^24.0.11",
+    "@types/mongodb": "^3.1.23",
+    "@types/ramda": "^0.26.7",
+    "@typescript-eslint/eslint-plugin": "^1.6.0",
+    "@typescript-eslint/parser": "^1.6.0",
+    "eslint": "^5.16.0",
+    "jest": "^24.7.1",
+    "mongodb": "^3.2.3",
+    "mongodb-memory-server": "^5.0.4",
+    "ts-jest": "^24.0.2",
+    "typescript": "^3.4.4"
+  },
+  "dependencies": {
+    "fp-ts": "^1.17.0",
+    "ramda": "^0.26.1"
+  }
+}
