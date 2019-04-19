@@ -3,8 +3,8 @@
     "noImplicitAny": true,
     "removeComments": true,
     "preserveConstEnums": true,
+    "declaration": true,
     "outDir": "dist",
-    "sourceMap": true,
     "lib": [
       "es2016",
       "esnext"

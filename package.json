@@ -4,7 +4,7 @@
   "description": "A monadic wrapper for MongoDB",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "rm -r dist && tsc",
     "test": "jest"
   },
   "keywords": [
@@ -14,7 +14,7 @@
     "functional"
   ],
   "author": "Malte Sellmer",
-  "license": "ISC",
+  "license": "MIT",
   "peerDependencies": {
     "mongodb": "^3.2.3"
   },
@@ -32,7 +32,12 @@
     "typescript": "^3.4.4"
   },
   "dependencies": {
+    "@types/mongodb": "^3.1.23",
     "fp-ts": "^1.17.0",
     "ramda": "^0.26.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/exqir/mongad.git"
   }
 }
