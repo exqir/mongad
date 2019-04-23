@@ -1,6 +1,6 @@
 import * as mongo from 'mongodb-memory-server'
 import { Db, connect, MongoClient, MongoError } from 'mongodb'
-import { insertOne, findMany, deleteMany } from './operations'
+import { insertOne, findMany, deleteMany, updateOne } from './operations'
 
 let memoryServer: mongo.MongoMemoryServer = null;
 let client: MongoClient = null;
@@ -35,7 +35,7 @@ afterEach(async () => {
 describe('Database shared functions', () => {
   const collection = 'testCollection'
 
-  describe('create', () => {
+  describe('insertOne', () => {
     test('left value should contain error', async () => {
       // close connection to provoke error from mongo
       await client.close()
@@ -66,7 +66,7 @@ describe('Database shared functions', () => {
     })
   })
 
-  describe('read', () => {
+  describe('findMany', () => {
     test('left value should contain error', async () => {
       // close connection to provoke error from mongo
       await client.close()
@@ -107,7 +107,7 @@ describe('Database shared functions', () => {
     })
   })
 
-  describe('delete', () => {
+  describe('deleteMany', () => {
     test('left value should contain error', async () => {
       await db.collection(collection).insertMany([
         { name: 'testName', property: 'testProperty' },
@@ -143,6 +143,45 @@ describe('Database shared functions', () => {
         err => { throw err },
         res => expect(res).toEqual(2),
       )
+    })
+  })
+
+  describe('updateOne', () => {
+    test('left value should contain error', async () => {
+      // close connection to provoke error from mongo
+      await client.close()
+
+      const result = await updateOne(collection, {}, {})
+        .run(db)
+
+      // reconnect to database to not break afterEach reset function
+      await connectToDatabase()
+      expect(() =>
+        result.fold(
+          err => { throw err },
+          _ => null,
+        )
+      ).toThrow(MongoError)
+    })
+
+    test('right value should contain number of updated documents', async () => {
+      const obj = { name: 'testName', property: 'testProperty' }
+      await db.collection(collection).insertMany([
+        obj,
+        { name: 'some', property: 'none' },
+      ])
+
+      const result = await updateOne(collection, { name: 'testName' }, { $set: { property: 'postUpdate' } })
+        .run(db)
+
+      result.fold(
+        err => { throw err },
+        res => {
+          expect(res).toEqual(1)
+        },
+      )
+      expect(await db.collection(collection).findOne({ name: 'testName' }))
+        .toHaveProperty('property', 'postUpdate')
     })
   })
 })

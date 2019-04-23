@@ -1,14 +1,28 @@
-import { Db, InsertOneWriteOpResult, FilterQuery, DeleteWriteOpResultObject, Collection } from 'mongodb'
+import {
+  Db,
+  InsertOneWriteOpResult,
+  FilterQuery,
+  DeleteWriteOpResultObject,
+  Collection,
+  UpdateWriteOpResult
+} from 'mongodb'
 import { head, view, compose } from 'ramda'
 import { ReaderTaskEither, } from 'fp-ts/lib/ReaderTaskEither'
 import { TaskEither } from 'fp-ts/lib/TaskEither'
 import { Task } from 'fp-ts/lib/Task'
 
-import { applyToCollection, toArray, insertResultLens, opResultValueLens } from './shared'
+import {
+  applyToCollection,
+  toArray,
+  insertResultLens,
+  opResultValueLens,
+  updateWriteResultLens,
+} from './shared'
 
 const insertO = <T>(document: T) => (collection: Collection) => collection.insertOne(document)
 const findM = <T>(query: FilterQuery<T>) => (collection: Collection<T>) => collection.find(query)
 const deleteM = <T>(query: FilterQuery<T>) => (collection: Collection) => collection.deleteMany(query)
+const updateO = <T>(query: FilterQuery<T>, update: {}) => (collection: Collection) => collection.updateOne(query, update)
 
 /**
  * 
@@ -47,4 +61,16 @@ export function deleteMany<T extends object>(collection: string, query: FilterQu
   return new ReaderTaskEither((db: Db) => new TaskEither(
     new Task(() => applyToCollection<DeleteWriteOpResultObject>(collection, deleteM<T>(query))(db))
   )).map(view<DeleteWriteOpResultObject, number>(opResultValueLens()))
+}
+
+/**
+ * 
+ * @param collection 
+ * @param query 
+ * @param update 
+ */
+export function updateOne<T extends object>(collection: string, query: FilterQuery<T>, update: {}) {
+  return new ReaderTaskEither((db: Db) => new TaskEither(
+    new Task(() => applyToCollection(collection, updateO(query, update))(db))
+  )).map(view<UpdateWriteOpResult, number>(updateWriteResultLens()))
 }
