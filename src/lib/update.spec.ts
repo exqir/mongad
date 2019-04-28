@@ -2,14 +2,14 @@ import * as mongo from 'mongodb-memory-server'
 import { Db, connect, MongoClient, MongoError } from 'mongodb'
 import { updateOne, updateMany } from './update'
 
-let memoryServer: mongo.MongoMemoryServer = null;
-let client: MongoClient = null;
-let db: Db = null;
+let memoryServer: mongo.MongoMemoryServer = null
+let client: MongoClient = null
+let db: Db = null
 
 async function connectToDatabase() {
   client = await connect(
     await memoryServer.getConnectionString(),
-    { useNewUrlParser: true }
+    { useNewUrlParser: true },
   )
 
   db = client.db(await memoryServer.getDbName())
@@ -39,16 +39,17 @@ describe('updateOne', () => {
     // close connection to provoke error from mongo
     await client.close()
 
-    const result = await updateOne(collection, {}, {})
-      .run(db)
+    const result = await updateOne(collection, {}, {}).run(db)
 
     // reconnect to database to not break afterEach reset function
     await connectToDatabase()
     expect(() =>
       result.fold(
-        err => { throw err },
+        err => {
+          throw err
+        },
         _ => null,
-      )
+      ),
     ).toThrow(MongoError)
   })
 
@@ -56,11 +57,16 @@ describe('updateOne', () => {
     const obj = { name: 'testName', property: 'testProperty' }
     await db.collection(collection).insertOne(obj)
 
-    const result = await updateOne(collection, { name: 'testName' }, { $set: { property: 'postUpdate' } })
-      .run(db)
+    const result = await updateOne(
+      collection,
+      { name: 'testName' },
+      { $set: { property: 'postUpdate' } },
+    ).run(db)
 
     result.fold(
-      err => { throw err },
+      err => {
+        throw err
+      },
       res => {
         expect(res).toMatchObject({ ...obj, property: 'postUpdate' })
       },
@@ -73,16 +79,17 @@ describe('updateMany', () => {
     // close connection to provoke error from mongo
     await client.close()
 
-    const result = await updateMany(collection, {}, {})
-      .run(db)
+    const result = await updateMany(collection, {}, {}).run(db)
 
     // reconnect to database to not break afterEach reset function
     await connectToDatabase()
     expect(() =>
       result.fold(
-        err => { throw err },
+        err => {
+          throw err
+        },
         _ => null,
-      )
+      ),
     ).toThrow(MongoError)
   })
 
@@ -93,13 +100,21 @@ describe('updateMany', () => {
     ]
     await db.collection(collection).insertMany(toBeUpdated)
 
-    const result = await updateMany(collection, { name: 'testName' }, { $set: { property: 'postUpdate' } })
-      .run(db)
+    const result = await updateMany(
+      collection,
+      { name: 'testName' },
+      { $set: { property: 'postUpdate' } },
+    ).run(db)
 
     result.fold(
-      err => { throw err },
+      err => {
+        throw err
+      },
       res => {
-        expect(res).toMatchObject([{ name: 'testName', property: 'postUpdate' }, { name: 'testName', property: 'postUpdate' }])
+        expect(res).toMatchObject([
+          { name: 'testName', property: 'postUpdate' },
+          { name: 'testName', property: 'postUpdate' },
+        ])
       },
     )
   })

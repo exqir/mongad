@@ -2,14 +2,14 @@ import * as mongo from 'mongodb-memory-server'
 import { Db, connect, MongoClient, MongoError } from 'mongodb'
 import { deleteOne, deleteMany } from './delete'
 
-let memoryServer: mongo.MongoMemoryServer = null;
-let client: MongoClient = null;
-let db: Db = null;
+let memoryServer: mongo.MongoMemoryServer = null
+let client: MongoClient = null
+let db: Db = null
 
 async function connectToDatabase() {
   client = await connect(
     await memoryServer.getConnectionString(),
-    { useNewUrlParser: true }
+    { useNewUrlParser: true },
   )
 
   db = client.db(await memoryServer.getDbName())
@@ -36,40 +36,42 @@ const collection = 'testCollection'
 
 describe('deleteOne', () => {
   test('left value should contain error', async () => {
-    await db.collection(collection).insertMany([
-      { name: 'testName', property: 'testProperty' },
-      { name: 'some', property: 'none' }
-    ])
+    await db
+      .collection(collection)
+      .insertMany([
+        { name: 'testName', property: 'testProperty' },
+        { name: 'some', property: 'none' },
+      ])
     // close connection to provoke error from mongo
     await client.close()
 
-    const result = await deleteOne(collection, { name: 'testName' })
-      .run(db)
+    const result = await deleteOne(collection, { name: 'testName' }).run(db)
 
     // reconnect to database to not break afterEach reset function
     await connectToDatabase()
     expect(() =>
       result.fold(
-        err => { throw err },
+        err => {
+          throw err
+        },
         _ => null,
-      )
+      ),
     ).toThrow(MongoError)
   })
 
   test('right value should contain the deleted document', async () => {
     const toBeDeleted = [
       { name: 'testName', property: 'testProperty' },
-      { name: 'testName', property: 'anotherProperty' }
+      { name: 'testName', property: 'anotherProperty' },
     ]
-    await db.collection(collection).insertMany([
-      ...toBeDeleted
-    ])
+    await db.collection(collection).insertMany([...toBeDeleted])
 
-    const result = await deleteOne(collection, { name: 'testName' })
-      .run(db)
+    const result = await deleteOne(collection, { name: 'testName' }).run(db)
 
     result.fold(
-      err => { throw err },
+      err => {
+        throw err
+      },
       res => expect(res).toEqual(toBeDeleted[0]),
     )
   })
@@ -77,41 +79,44 @@ describe('deleteOne', () => {
 
 describe('deleteMany', () => {
   test('left value should contain error', async () => {
-    await db.collection(collection).insertMany([
-      { name: 'testName', property: 'testProperty' },
-      { name: 'some', property: 'none' }
-    ])
+    await db
+      .collection(collection)
+      .insertMany([
+        { name: 'testName', property: 'testProperty' },
+        { name: 'some', property: 'none' },
+      ])
     // close connection to provoke error from mongo
     await client.close()
 
-    const result = await deleteMany(collection, { name: 'testName' })
-      .run(db)
+    const result = await deleteMany(collection, { name: 'testName' }).run(db)
 
     // reconnect to database to not break afterEach reset function
     await connectToDatabase()
     expect(() =>
       result.fold(
-        err => { throw err },
+        err => {
+          throw err
+        },
         _ => null,
-      )
+      ),
     ).toThrow(MongoError)
   })
 
   test('right value should contain all deleted documents', async () => {
     const toBeDeleted = [
       { name: 'testName', property: 'testProperty' },
-      { name: 'testName', property: 'anotherProperty' }
+      { name: 'testName', property: 'anotherProperty' },
     ]
-    await db.collection(collection).insertMany([
-      { name: 'some', property: 'none' },
-      ...toBeDeleted
-    ])
+    await db
+      .collection(collection)
+      .insertMany([{ name: 'some', property: 'none' }, ...toBeDeleted])
 
-    const result = await deleteMany(collection, { name: 'testName' })
-      .run(db)
+    const result = await deleteMany(collection, { name: 'testName' }).run(db)
 
     result.fold(
-      err => { throw err },
+      err => {
+        throw err
+      },
       res => expect(res).toEqual(toBeDeleted),
     )
   })
