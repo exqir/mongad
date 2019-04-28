@@ -52,7 +52,7 @@ describe('findOne', () => {
     ).toThrow(MongoError)
   })
 
-  test('right value should contain requested document', async () => {
+  test('right value should contain the requested document', async () => {
     const toBeFound = [
       { name: 'testName', property: 'testProperty' },
       { name: 'testName', property: 'anotherProperty' },

@@ -83,7 +83,7 @@ describe('insertMany', () => {
     ).toThrow(MongoError)
   })
 
-  test('right value should contain created document', async () => {
+  test('right value should contain all the created documents', async () => {
     const toBeInserted = [
       { name: 'testName', property: 'testProperty' },
       { name: 'testName1', property: 'testProperty' }
