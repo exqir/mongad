@@ -10,7 +10,17 @@ import { Task } from 'fp-ts/lib/Task'
 
 import { applyToCollection, toArray } from './shared'
 
+const findO = <T>(query: FilterQuery<T>) => (collection: Collection<T>) => collection.findOne(query)
 const findM = <T>(query: FilterQuery<T>) => (collection: Collection<T>) => collection.find(query)
+
+/**
+ * 
+ */
+export function findOne<T extends object>(collection: string, query: FilterQuery<T>) {
+  return new ReaderTaskEither((db: Db) => new TaskEither(
+    new Task(() => applyToCollection<T>(collection, findO(query))(db))
+  ))
+}
 
 /**
  * 
