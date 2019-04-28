@@ -1,6 +1,6 @@
 import * as mongo from 'mongodb-memory-server'
 import { Db, connect, MongoClient, MongoError } from 'mongodb'
-import { insertOne, findMany, deleteMany, updateOne } from './operations'
+import { insertOne, findMany, deleteMany, updateOne } from './lib'
 
 let memoryServer: mongo.MongoMemoryServer = null;
 let client: MongoClient = null;
@@ -85,12 +85,13 @@ describe('Database shared functions', () => {
     })
 
     test('right value should contain all requested documents', async () => {
-      const obj = { name: 'testName', property: 'testProperty' }
-      const otherObj = { name: 'testName', property: 'anotherProperty' }
+      const toBeFound = [
+        { name: 'testName', property: 'testProperty' },
+        { name: 'testName', property: 'anotherProperty' }
+      ]
       await db.collection(collection).insertMany([
-        obj,
         { name: 'some', property: 'none' },
-        otherObj,
+        ...toBeFound,
       ])
 
       const result = await findMany(collection, { name: 'testName' })
@@ -98,11 +99,7 @@ describe('Database shared functions', () => {
 
       result.fold(
         err => { throw err },
-        doc => {
-          expect(doc).toHaveLength(2)
-          expect(doc).toContainEqual(obj)
-          expect(doc).toContainEqual(otherObj)
-        },
+        res => expect(res).toEqual(toBeFound),
       )
     })
   })
@@ -129,11 +126,14 @@ describe('Database shared functions', () => {
       ).toThrow(MongoError)
     })
 
-    test('right value should containe number of deleted entries', async () => {
-      await db.collection(collection).insertMany([
+    test('right value should contain deleted documents', async () => {
+      const toBeDeleted = [
         { name: 'testName', property: 'testProperty' },
-        { name: 'some', property: 'none' },
         { name: 'testName', property: 'anotherProperty' }
+      ]
+      await db.collection(collection).insertMany([
+        { name: 'some', property: 'none' },
+        ...toBeDeleted
       ])
 
       const result = await deleteMany(collection, { name: 'testName' })
@@ -141,7 +141,7 @@ describe('Database shared functions', () => {
 
       result.fold(
         err => { throw err },
-        res => expect(res).toEqual(2),
+        res => expect(res).toEqual(toBeDeleted),
       )
     })
   })
@@ -166,10 +166,7 @@ describe('Database shared functions', () => {
 
     test('right value should contain number of updated documents', async () => {
       const obj = { name: 'testName', property: 'testProperty' }
-      await db.collection(collection).insertMany([
-        obj,
-        { name: 'some', property: 'none' },
-      ])
+      await db.collection(collection).insertOne(obj)
 
       const result = await updateOne(collection, { name: 'testName' }, { $set: { property: 'postUpdate' } })
         .run(db)
@@ -177,11 +174,9 @@ describe('Database shared functions', () => {
       result.fold(
         err => { throw err },
         res => {
-          expect(res).toEqual(1)
+          expect(res).toMatchObject({ ...obj, property: 'postUpdate' })
         },
       )
-      expect(await db.collection(collection).findOne({ name: 'testName' }))
-        .toHaveProperty('property', 'postUpdate')
     })
   })
 })
