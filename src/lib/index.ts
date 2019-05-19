@@ -1,3 +1,4 @@
+export * from './connect'
 export * from './insert'
 export * from './find'
 export * from './delete'
