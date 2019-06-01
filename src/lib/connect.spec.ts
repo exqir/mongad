@@ -30,13 +30,14 @@ describe('connect', () => {
   })
 
   test('right value should contain the MongoClient', async () => {
-    const server = memoryServer.getConnectionString()
+    const server = memoryServer
+      .getConnectionString()
       .then(str => str.match(/\/\/(.+):/))
       .then(([, ip]) => ip)
 
     const result = await connect({
       server: await server,
-      port: await memoryServer.getPort()
+      port: await memoryServer.getPort(),
     }).run()
 
     result.fold(
@@ -46,7 +47,7 @@ describe('connect', () => {
       res => {
         expect(res).toBeInstanceOf(MongoClient)
         res.close()
-      }
+      },
     )
   })
 })
@@ -60,6 +61,6 @@ describe('getDb', () => {
 
     const result = getDb(await memoryServer.getDbName())(client)
 
-    expect(result).toBeInstanceOf(Db);
+    expect(result).toBeInstanceOf(Db)
   })
 })
