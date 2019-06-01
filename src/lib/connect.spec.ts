@@ -1,6 +1,6 @@
 import * as mongo from 'mongodb-memory-server'
-import { MongoClient, Db, connect } from 'mongodb'
-import { conn, getDb } from './connect'
+import { MongoClient, Db, connect as mongoConnect } from 'mongodb'
+import { connect, getDb } from './connect'
 
 let memoryServer: mongo.MongoMemoryServer = null
 
@@ -14,7 +14,7 @@ afterAll(async () => {
 
 describe('connect', () => {
   test('left value should contain error', async () => {
-    const result = await conn({
+    const result = await connect({
       server: 'none',
       port: 1234,
     }).run()
@@ -34,7 +34,7 @@ describe('connect', () => {
       .then(str => str.match(/\/\/(.+):/))
       .then(([, ip]) => ip)
 
-    const result = await conn({
+    const result = await connect({
       server: await server,
       port: await memoryServer.getPort()
     }).run()
@@ -53,7 +53,7 @@ describe('connect', () => {
 
 describe('getDb', () => {
   test('should get Db from MongoClient', async () => {
-    const client = await connect(
+    const client = await mongoConnect(
       await memoryServer.getConnectionString(),
       { useNewUrlParser: true },
     )

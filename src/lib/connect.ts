@@ -1,4 +1,4 @@
-import { connect, MongoClient } from 'mongodb'
+import { connect as mongoConnect, MongoClient } from 'mongodb'
 import { Task } from 'fp-ts/lib/Task'
 import { promiseToEither } from './shared';
 
@@ -7,8 +7,8 @@ interface DatabaseConfig {
   port: number;
 }
 
-export const conn = ({ server, port }: DatabaseConfig) => {
-  return new Task(() => promiseToEither(connect(`mongodb://${server}:${port}`, { useNewUrlParser: true })))
+export const connect = ({ server, port }: DatabaseConfig) => {
+  return new Task(() => promiseToEither(mongoConnect(`mongodb://${server}:${port}`, { useNewUrlParser: true })))
 }
 
 export const getDb = (db: string) => (client: MongoClient) => {
