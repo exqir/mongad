@@ -34,7 +34,7 @@
     "typescript": "^3.4.4"
   },
   "dependencies": {
-    "@types/mongodb": "^3.1.23",
+    "@types/mongodb": "^3.1.28",
     "fp-ts": "^1.18.2",
     "ramda": "^0.26.1"
   },
