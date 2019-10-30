@@ -1,7 +1,5 @@
-import { Db, FilterQuery, Collection, UpdateWriteOpResult } from 'mongodb'
-import { ReaderTaskEither } from 'fp-ts/lib/ReaderTaskEither'
-import { TaskEither } from 'fp-ts/lib/TaskEither'
-import { Task } from 'fp-ts/lib/Task'
+import { Db, FilterQuery, Collection, UpdateWriteOpResult, MongoError } from 'mongodb'
+import { ReaderTaskEither, apSecond } from 'fp-ts/lib/ReaderTaskEither'
 
 import { applyToCollection } from './shared'
 import { findOne, findMany } from './find'
@@ -17,18 +15,8 @@ function _updateO<T extends object>(
   collection: string,
   query: FilterQuery<T>,
   update: {},
-) {
-  return new ReaderTaskEither(
-    (db: Db) =>
-      new TaskEither(
-        new Task(() =>
-          applyToCollection<UpdateWriteOpResult>(
-            collection,
-            updateO<T>(query, update),
-          )(db),
-        ),
-      ),
-  )
+): ReaderTaskEither<Db, MongoError, UpdateWriteOpResult> {
+  return (db: Db) => () => applyToCollection<UpdateWriteOpResult>(collection, updateO<T>(query, update))(db)
 }
 
 /**
@@ -41,28 +29,16 @@ export function updateOne<T extends object>(
   collection: string,
   query: FilterQuery<T>,
   update: {},
-) {
-  return _updateO(collection, query, update).applySecond(
-    findOne<T>(collection, query),
-  )
+): ReaderTaskEither<Db, MongoError, T> {
+  return apSecond(findOne<T>(collection, query))((_updateO(collection, query, update)))
 }
 
 function _updateM<T extends object>(
   collection: string,
   query: FilterQuery<T>,
   update: {},
-) {
-  return new ReaderTaskEither(
-    (db: Db) =>
-      new TaskEither(
-        new Task(() =>
-          applyToCollection<UpdateWriteOpResult>(
-            collection,
-            updateM<T>(query, update),
-          )(db),
-        ),
-      ),
-  )
+): ReaderTaskEither<Db, MongoError, UpdateWriteOpResult> {
+  return (db: Db) => () => applyToCollection<UpdateWriteOpResult>(collection, updateM<T>(query, update))(db)
 }
 
 /**
@@ -75,8 +51,6 @@ export function updateMany<T extends object>(
   collection: string,
   query: FilterQuery<T>,
   update: {},
-) {
-  return _updateM(collection, query, update).applySecond(
-    findMany<T>(collection, query),
-  )
+): ReaderTaskEither<Db, MongoError, T[]> {
+  return apSecond(findMany<T>(collection, query))(_updateM(collection, query, update))
 }

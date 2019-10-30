@@ -1,4 +1,6 @@
 import * as mongo from 'mongodb-memory-server'
+import { run } from 'fp-ts/lib/ReaderTaskEither';
+import { fold } from 'fp-ts/lib/Either';
 import { Db, connect, MongoClient, MongoError } from 'mongodb'
 import { deleteOne, deleteMany } from './delete'
 
@@ -45,18 +47,15 @@ describe('deleteOne', () => {
     // close connection to provoke error from mongo
     await client.close()
 
-    const result = await deleteOne(collection, { name: 'testName' }).run(db)
+    const result = await run(deleteOne(collection, { name: 'testName' }), db)
 
     // reconnect to database to not break afterEach reset function
     await connectToDatabase()
-    expect(() =>
-      result.fold(
-        err => {
-          throw err
-        },
-        _ => null,
-      ),
-    ).toThrow(MongoError)
+    expect(result._tag).toEqual('Left')
+    expect(() => fold<MongoError, object, any>(
+      err => { throw err },
+      _ => null
+    )(result)).toThrow(MongoError)
   })
 
   test('right value should contain the deleted document', async () => {
@@ -66,14 +65,12 @@ describe('deleteOne', () => {
     ]
     await db.collection(collection).insertMany([...toBeDeleted])
 
-    const result = await deleteOne(collection, { name: 'testName' }).run(db)
+    const result = await run(deleteOne(collection, { name: 'testName' }), db)
 
-    result.fold(
-      err => {
-        throw err
-      },
+    fold<MongoError, object, any>(
+      err => { throw err },
       res => expect(res).toEqual(toBeDeleted[0]),
-    )
+    )(result)
   })
 })
 
@@ -88,18 +85,15 @@ describe('deleteMany', () => {
     // close connection to provoke error from mongo
     await client.close()
 
-    const result = await deleteMany(collection, { name: 'testName' }).run(db)
+    const result = await run(deleteMany(collection, { name: 'testName' }), db)
 
     // reconnect to database to not break afterEach reset function
     await connectToDatabase()
-    expect(() =>
-      result.fold(
-        err => {
-          throw err
-        },
-        _ => null,
-      ),
-    ).toThrow(MongoError)
+    expect(result._tag).toEqual('Left')
+    expect(() => fold<MongoError, object, any>(
+      err => { throw err },
+      _ => null
+    )(result)).toThrow(MongoError)
   })
 
   test('right value should contain all deleted documents', async () => {
@@ -111,13 +105,11 @@ describe('deleteMany', () => {
       .collection(collection)
       .insertMany([{ name: 'some', property: 'none' }, ...toBeDeleted])
 
-    const result = await deleteMany(collection, { name: 'testName' }).run(db)
+    const result = await run(deleteMany(collection, { name: 'testName' }), db)
 
-    result.fold(
-      err => {
-        throw err
-      },
+    fold<MongoError, object, any>(
+      err => { throw err },
       res => expect(res).toEqual(toBeDeleted),
-    )
+    )(result)
   })
 })

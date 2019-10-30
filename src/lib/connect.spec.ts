@@ -1,4 +1,5 @@
 import * as mongo from 'mongodb-memory-server'
+import { fold } from 'fp-ts/lib/Either';
 import { MongoClient, Db, connect as mongoConnect } from 'mongodb'
 import { connect, getDb } from './connect'
 
@@ -17,16 +18,12 @@ describe('connect', () => {
     const result = await connect({
       server: 'none',
       port: 1234,
-    }).run()
+    })()
 
-    expect(() =>
-      result.fold(
-        err => {
-          throw err
-        },
-        _ => null,
-      ),
-    ).toThrow()
+    expect(() => fold<Error, object, any>(
+      err => { throw err },
+      _ => null
+    )(result)).toThrow()
   })
 
   test('right value should contain the MongoClient', async () => {
@@ -38,9 +35,9 @@ describe('connect', () => {
     const result = await connect({
       server: await server,
       port: await memoryServer.getPort(),
-    }).run()
+    })()
 
-    result.fold(
+    fold<Error, MongoClient, any>(
       err => {
         throw err
       },
@@ -48,7 +45,7 @@ describe('connect', () => {
         expect(res).toBeInstanceOf(MongoClient)
         res.close()
       },
-    )
+    )(result)
   })
 })
 

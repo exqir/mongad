@@ -13,7 +13,7 @@ export function opResultValueLens() {
 }
 
 export function insertResultLens<T>() {
-  return lens<InsertOneWriteOpResult, T[], InsertOneWriteOpResult>(
+  return lens<InsertOneWriteOpResult<T>, T[], InsertOneWriteOpResult<T>>(
     insertResult => insertResult.ops,
     (value, insertResult) => ({ ...insertResult, ops: value }),
   )

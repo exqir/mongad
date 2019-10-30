@@ -1,4 +1,6 @@
 import * as mongo from 'mongodb-memory-server'
+import { run } from 'fp-ts/lib/ReaderTaskEither';
+import { fold } from 'fp-ts/lib/Either';
 import { Db, connect, MongoClient, MongoError } from 'mongodb'
 import { updateOne, updateMany } from './update'
 
@@ -39,38 +41,31 @@ describe('updateOne', () => {
     // close connection to provoke error from mongo
     await client.close()
 
-    const result = await updateOne(collection, {}, {}).run(db)
+    const result = await run(updateOne(collection, {}, {}), db)
 
     // reconnect to database to not break afterEach reset function
     await connectToDatabase()
-    expect(() =>
-      result.fold(
-        err => {
-          throw err
-        },
-        _ => null,
-      ),
-    ).toThrow(MongoError)
+    expect(result._tag).toEqual('Left')
+    expect(() => fold<MongoError, object, any>(
+      err => { throw err },
+      _ => null
+    )(result)).toThrow(MongoError)
   })
 
   test('right value should contain the updated document', async () => {
     const obj = { name: 'testName', property: 'testProperty' }
     await db.collection(collection).insertOne(obj)
 
-    const result = await updateOne(
+    const result = await run(updateOne(
       collection,
       { name: 'testName' },
       { $set: { property: 'postUpdate' } },
-    ).run(db)
+    ), db)
 
-    result.fold(
-      err => {
-        throw err
-      },
-      res => {
-        expect(res).toMatchObject({ ...obj, property: 'postUpdate' })
-      },
-    )
+    fold<MongoError, object, any>(
+      err => { throw err },
+      res => expect(res).toMatchObject({ ...obj, property: 'postUpdate' }),
+    )(result)
   })
 })
 
@@ -79,18 +74,15 @@ describe('updateMany', () => {
     // close connection to provoke error from mongo
     await client.close()
 
-    const result = await updateMany(collection, {}, {}).run(db)
+    const result = await run(updateMany(collection, {}, {}), db)
 
     // reconnect to database to not break afterEach reset function
     await connectToDatabase()
-    expect(() =>
-      result.fold(
-        err => {
-          throw err
-        },
-        _ => null,
-      ),
-    ).toThrow(MongoError)
+    expect(result._tag).toEqual('Left')
+    expect(() => fold<MongoError, object, any>(
+      err => { throw err },
+      _ => null
+    )(result)).toThrow(MongoError)
   })
 
   test('right value should contain all updated documents', async () => {
@@ -100,22 +92,20 @@ describe('updateMany', () => {
     ]
     await db.collection(collection).insertMany(toBeUpdated)
 
-    const result = await updateMany(
+    const result = await run(updateMany(
       collection,
       { name: 'testName' },
       { $set: { property: 'postUpdate' } },
-    ).run(db)
+    ), db)
 
-    result.fold(
-      err => {
-        throw err
-      },
+    fold<MongoError, object, any>(
+      err => { throw err },
       res => {
         expect(res).toMatchObject([
           { name: 'testName', property: 'postUpdate' },
           { name: 'testName', property: 'postUpdate' },
         ])
       },
-    )
+    )(result)
   })
 })

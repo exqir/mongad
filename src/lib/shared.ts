@@ -32,21 +32,21 @@ export const toArray = <T>(c: Cursor<T>) => c.toArray()
  * @param {string} collection Name of collection to apply function to
  * @param {func} f Function taking a Collection<R> and returning a Promise<R> or Promise<R[]>
  */
-export function applyToCollection<R>(
+export function applyToCollection<C, R = C>(
   collection: string,
-  f: (collection: Collection<R>) => Promise<R>,
+  f: (collection: Collection<C>) => Promise<R>,
 ): (db: Db) => Promise<Either<MongoError, R>>
-export function applyToCollection<R>(
+export function applyToCollection<C, R = C>(
   collection: string,
-  f: (collection: Collection<R>) => Promise<R[]>,
+  f: (collection: Collection<C>) => Promise<R[]>,
 ): (db: Db) => Promise<Either<MongoError, R[]>>
-export function applyToCollection<R>(
+export function applyToCollection<C, R = C>(
   collection: string,
-  f: (collection: Collection<R>) => Promise<R | R[]>,
+  f: (collection: Collection<C>) => Promise<R | R[]>,
 ) {
   return compose(
     promiseToEither,
     f,
-    getCollection<R>(collection),
+    getCollection<C>(collection),
   )
 }
