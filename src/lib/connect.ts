@@ -1,14 +1,18 @@
-import { connect as mongoConnect, MongoClient, MongoError } from 'mongodb'
+import {
+  connect as mongoConnect,
+  MongoClient,
+  MongoError,
+  MongoClientOptions,
+} from 'mongodb'
 import { TaskEither } from 'fp-ts/lib/TaskEither'
 import { promiseToEither } from './shared'
 
-interface DatabaseConfig {
-  server: string;
-  port: number;
-}
-
-export const connect = ({ server, port }: DatabaseConfig): TaskEither<MongoError, MongoClient> => {
-  return () => promiseToEither(mongoConnect(`mongodb://${server}:${port}`, { useNewUrlParser: true }))
+export const connect = (
+  uri: string,
+  options: MongoClientOptions = {},
+): TaskEither<MongoError, MongoClient> => {
+  return () =>
+    promiseToEither(mongoConnect(uri, { useNewUrlParser: true, ...options }))
 }
 
 export const getDb = (db: string) => (client: MongoClient) => {

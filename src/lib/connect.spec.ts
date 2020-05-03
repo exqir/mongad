@@ -1,5 +1,5 @@
 import * as mongo from 'mongodb-memory-server'
-import { fold } from 'fp-ts/lib/Either';
+import { fold } from 'fp-ts/lib/Either'
 import { MongoClient, Db, connect as mongoConnect } from 'mongodb'
 import { connect, getDb } from './connect'
 
@@ -15,27 +15,20 @@ afterAll(async () => {
 
 describe('connect', () => {
   test('left value should contain error', async () => {
-    const result = await connect({
-      server: 'none',
-      port: 1234,
-    })()
+    const result = await connect('mongodb://fail')()
 
-    expect(() => fold<Error, object, any>(
-      err => { throw err },
-      _ => null
-    )(result)).toThrow()
+    expect(() =>
+      fold<Error, object, any>(
+        err => {
+          throw err
+        },
+        _ => null,
+      )(result),
+    ).toThrow()
   })
 
   test('right value should contain the MongoClient', async () => {
-    const server = memoryServer
-      .getConnectionString()
-      .then(str => str.match(/\/\/(.+):/))
-      .then(([, ip]) => ip)
-
-    const result = await connect({
-      server: await server,
-      port: await memoryServer.getPort(),
-    })()
+    const result = await connect(await memoryServer.getConnectionString())()
 
     fold<Error, MongoClient, any>(
       err => {

@@ -28,11 +28,12 @@ export function findMany<T extends object>(
   collection: string,
   query: FilterQuery<T>,
 ): ReaderTaskEither<Db, MongoError, T[]> {
-  return (db: Db) => () => applyToCollection<T>(
-    collection,
-    compose(
-      toArray,
-      findM<T>(query),
-    ),
-  )(db)
+  return (db: Db) => () =>
+    applyToCollection<T>(
+      collection,
+      compose(
+        toArray,
+        findM<T>(query),
+      ),
+    )(db)
 }
