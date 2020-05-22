@@ -1,6 +1,6 @@
 import { Db, MongoError, Collection, Cursor } from 'mongodb'
-import { compose } from 'ramda'
 import { Either, left, right } from 'fp-ts/lib/Either'
+import { flow } from 'fp-ts/lib/function'
 
 /**
  * Get collection from Database
@@ -9,7 +9,7 @@ import { Either, left, right } from 'fp-ts/lib/Either'
  * @returns {Collection} Collection with given name from provided Database
  */
 export const getCollection = <T>(collection: string) => (
-  db: Db,
+  db: Db
 ): Collection<T> => db.collection(collection)
 
 /**
@@ -34,19 +34,15 @@ export const toArray = <T>(c: Cursor<T>) => c.toArray()
  */
 export function applyToCollection<C, R = C>(
   collection: string,
-  f: (collection: Collection<C>) => Promise<R>,
+  f: (collection: Collection<C>) => Promise<R | null>
 ): (db: Db) => Promise<Either<MongoError, R>>
 export function applyToCollection<C, R = C>(
   collection: string,
-  f: (collection: Collection<C>) => Promise<R[]>,
+  f: (collection: Collection<C>) => Promise<R[]>
 ): (db: Db) => Promise<Either<MongoError, R[]>>
 export function applyToCollection<C, R = C>(
   collection: string,
-  f: (collection: Collection<C>) => Promise<R | R[]>,
+  f: (collection: Collection<C>) => Promise<R | R[]>
 ) {
-  return compose(
-    promiseToEither,
-    f,
-    getCollection<C>(collection),
-  )
+  return flow(getCollection<C>(collection), f, promiseToEither)
 }

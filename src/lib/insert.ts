@@ -1,46 +1,46 @@
-import {
-  Db,
-  InsertOneWriteOpResult,
-  Collection,
-  InsertWriteOpResult,
-  MongoError,
-} from 'mongodb'
-import { head, view } from 'ramda'
-import { ReaderTaskEither, map } from 'fp-ts/lib/ReaderTaskEither'
+import { Db, Collection, MongoError, OptionalId, WithId } from 'mongodb'
+import { ReaderTaskEither } from 'fp-ts/lib/ReaderTaskEither'
+import { map } from 'fp-ts/lib/TaskEither'
+import { pipe } from 'fp-ts/lib/pipeable'
 
 import { applyToCollection } from './shared'
-import { insertResultLens } from './lenses'
 
 // TODO: Type Collections with Generic. However, this might cause errors through falsy type inference
-const insertO = <T>(document: T) => (collection: Collection<T>) =>
-  collection.insertOne(document) as unknown as Promise<InsertOneWriteOpResult<T>>
-const insertM = <T>(documents: T[]) => (collection: Collection<T>) =>
-  collection.insertMany(documents) as unknown as Promise<InsertWriteOpResult<T>>
+const insertO = <T extends OptionalId<{}>>(document: T) => (
+  collection: Collection<T>
+) => collection.insertOne(document as OptionalId<T>)
+const insertM = <T extends OptionalId<{}>>(documents: T[]) => (
+  collection: Collection<T>
+) => collection.insertMany(documents as OptionalId<T>[])
 
 /**
  *
  * @param collection
  * @param document
  */
-export function insertOne<T extends object>(
+export function insertOne<T extends OptionalId<{}>>(
   collection: string,
   document: T
-): ReaderTaskEither<Db, MongoError, T> {
-  return map<InsertOneWriteOpResult<T>, T>(res => head(view<InsertOneWriteOpResult<T>, (T & { _id: string })[]>(insertResultLens<T>(), res)))(
-    (db: Db) => () => applyToCollection<T, InsertOneWriteOpResult<T>>(collection, insertO<T>(document))(db)
-  )
+): ReaderTaskEither<Db, MongoError, WithId<T>> {
+  return (db: Db) =>
+    pipe(
+      () => pipe(db, applyToCollection(collection, insertO(document))),
+      map(res => res.ops[0])
+    )
 }
 
 /**
  *
  * @param collection
- * @param document
+ * @param documents
  */
-export function insertMany<T extends object>(
+export function insertMany<T extends OptionalId<{}>>(
   collection: string,
-  documents: T[],
-): ReaderTaskEither<Db, MongoError, T[]> {
-  return map<InsertWriteOpResult<T>, T[]>(res => view<InsertWriteOpResult<T>, (T & { _id: string })[]>(insertResultLens<T>(), res))(
-    (db: Db) => () => applyToCollection<T, InsertWriteOpResult<T>>(collection, insertM<T>(documents))(db)
-  )
+  documents: T[]
+): ReaderTaskEither<Db, MongoError, WithId<T>[]> {
+  return (db: Db) =>
+    pipe(
+      () => pipe(db, applyToCollection(collection, insertM(documents))),
+      map(res => res.ops)
+    )
 }

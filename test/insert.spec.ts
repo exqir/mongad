@@ -1,18 +1,17 @@
 import * as mongo from 'mongodb-memory-server'
-import { run } from 'fp-ts/lib/ReaderTaskEither';
-import { fold } from 'fp-ts/lib/Either';
+import { run } from 'fp-ts/lib/ReaderTaskEither'
+import { fold } from 'fp-ts/lib/Either'
 import { Db, connect, MongoClient, MongoError } from 'mongodb'
-import { insertOne, insertMany } from './insert'
+import { insertOne, insertMany } from '../src/lib/insert'
 
-let memoryServer: mongo.MongoMemoryServer = null
-let client: MongoClient = null
-let db: Db = null
+let memoryServer: mongo.MongoMemoryServer
+let client: MongoClient
+let db: Db
 
 async function connectToDatabase() {
-  client = await connect(
-    await memoryServer.getConnectionString(),
-    { useNewUrlParser: true },
-  )
+  client = await connect(await memoryServer.getConnectionString(), {
+    useNewUrlParser: true,
+  })
 
   db = client.db(await memoryServer.getDbName())
 }
@@ -46,10 +45,14 @@ describe('insertOne', () => {
     // reconnect to database to not break afterEach reset function
     await connectToDatabase()
     expect(result._tag).toEqual('Left')
-    expect(() => fold<MongoError, object, any>(
-      err => { throw err },
-      _ => null
-    )(result)).toThrow(MongoError)
+    expect(() =>
+      fold(
+        err => {
+          throw err
+        },
+        _ => null
+      )(result)
+    ).toThrow(MongoError)
   })
 
   test('right value should contain created document', async () => {
@@ -57,9 +60,11 @@ describe('insertOne', () => {
 
     const result = await run(insertOne(collection, obj), db)
 
-    fold<MongoError, object, any>(
-      err => { throw err },
-      doc => expect(doc).toMatchObject(obj),
+    fold(
+      err => {
+        throw err
+      },
+      doc => expect(doc).toMatchObject(obj)
     )(result)
   })
 })
@@ -74,10 +79,14 @@ describe('insertMany', () => {
     // reconnect to database to not break afterEach reset function
     await connectToDatabase()
     expect(result._tag).toEqual('Left')
-    expect(() => fold<MongoError, object, any>(
-      err => { throw err },
-      _ => null
-    )(result)).toThrow(MongoError)
+    expect(() =>
+      fold(
+        err => {
+          throw err
+        },
+        _ => null
+      )(result)
+    ).toThrow(MongoError)
   })
 
   test('right value should contain all the created documents', async () => {
@@ -88,9 +97,11 @@ describe('insertMany', () => {
 
     const result = await run(insertMany(collection, toBeInserted), db)
 
-    fold<MongoError, object, any>(
-      err => { throw err },
-      doc => expect(doc).toEqual(toBeInserted),
+    fold(
+      err => {
+        throw err
+      },
+      doc => expect(doc).toEqual(toBeInserted)
     )(result)
   })
 })

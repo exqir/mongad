@@ -1,6 +1,6 @@
 import { Db, Collection, FilterQuery, MongoError } from 'mongodb'
-import { compose } from 'ramda'
 import { ReaderTaskEither } from 'fp-ts/lib/ReaderTaskEither'
+import { flow } from 'fp-ts/lib/function'
 
 import { applyToCollection, toArray } from './shared'
 
@@ -14,8 +14,8 @@ const findM = <T>(query: FilterQuery<T>) => (collection: Collection<T>) =>
  */
 export function findOne<T extends object>(
   collection: string,
-  query: FilterQuery<T>,
-): ReaderTaskEither<Db, MongoError, T> {
+  query: FilterQuery<T>
+): ReaderTaskEither<Db, MongoError, T | null> {
   return (db: Db) => () => applyToCollection<T>(collection, findO<T>(query))(db)
 }
 
@@ -26,14 +26,8 @@ export function findOne<T extends object>(
  */
 export function findMany<T extends object>(
   collection: string,
-  query: FilterQuery<T>,
+  query: FilterQuery<T>
 ): ReaderTaskEither<Db, MongoError, T[]> {
   return (db: Db) => () =>
-    applyToCollection<T>(
-      collection,
-      compose(
-        toArray,
-        findM<T>(query),
-      ),
-    )(db)
+    applyToCollection<T>(collection, flow(findM<T>(query), toArray))(db)
 }

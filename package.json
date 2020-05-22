@@ -1,45 +1,60 @@
 {
-  "name": "mongad",
-  "version": "0.0.1",
-  "description": "A monadic wrapper for MongoDB",
+  "version": "0.1.0",
+  "license": "MIT",
   "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "typings": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "engines": {
+    "node": ">=10"
+  },
   "scripts": {
-    "build": "rm -r dist && tsc",
-    "test": "jest",
-    "format": "prettier --write 'src/**/*.ts'"
+    "start": "tsdx watch",
+    "build": "tsdx build",
+    "test": "tsdx test",
+    "lint": "tsdx lint",
+    "prepare": "tsdx build"
+  },
+  "peerDependencies": {
+    "mongodb": "^3.3.3"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "tsdx lint"
+    }
+  },
+  "prettier": {
+    "printWidth": 80,
+    "semi": false,
+    "singleQuote": true,
+    "trailingComma": "es5"
+  },
+  "name": "mongad",
+  "author": "Malte Sellmer",
+  "module": "dist/mongad.esm.js",
+  "devDependencies": {
+    "husky": "^4.2.5",
+    "tsdx": "^0.13.2",
+    "tslib": "^2.0.0",
+    "typescript": "^3.9.3",
+    "mongodb": "^3.3.3",
+    "mongodb-memory-server": "^6.0.1"
+  },
+  "dependencies": {
+    "@types/mongodb": "^3.3.7",
+    "fp-ts": "^2.1.1"
+  },
+  "description": "A monadic wrapper for MongoDB",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/exqir/mongad.git"
   },
   "keywords": [
     "mongo",
     "db",
     "monads",
     "functional"
-  ],
-  "author": "Malte Sellmer",
-  "license": "MIT",
-  "peerDependencies": {
-    "mongodb": "^3.3.3"
-  },
-  "devDependencies": {
-    "@types/jest": "^24.0.21",
-    "@types/ramda": "^0.26.7",
-    "@typescript-eslint/eslint-plugin": "^2.6.0",
-    "@typescript-eslint/parser": "^2.6.0",
-    "eslint": "^6.6.0",
-    "jest": "^24.9.0",
-    "mongodb": "^3.3.3",
-    "mongodb-memory-server": "^6.0.1",
-    "prettier": "^1.17.0",
-    "ts-jest": "^24.1.0",
-    "typescript": "^3.6.4"
-  },
-  "dependencies": {
-    "@types/mongodb": "^3.3.7",
-    "fp-ts": "^2.1.1",
-    "ramda": "^0.26.1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/exqir/mongad.git"
-  }
+  ]
 }

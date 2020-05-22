@@ -1,4 +1,10 @@
-import { Db, FilterQuery, DeleteWriteOpResultObject, Collection, MongoError } from 'mongodb'
+import {
+  Db,
+  FilterQuery,
+  DeleteWriteOpResultObject,
+  Collection,
+  MongoError,
+} from 'mongodb'
 import { ReaderTaskEither, apFirst } from 'fp-ts/lib/ReaderTaskEither'
 
 import { applyToCollection } from './shared'
@@ -11,12 +17,13 @@ const deleteM = <T>(query: FilterQuery<T>) => (collection: Collection) =>
 
 function _deleteOne<T extends object>(
   collection: string,
-  query: FilterQuery<T>,
+  query: FilterQuery<T>
 ): ReaderTaskEither<Db, MongoError, DeleteWriteOpResultObject> {
-  return (db: Db) => () => applyToCollection<DeleteWriteOpResultObject>(
-    collection,
-    deleteO<T>(query),
-  )(db)
+  return (db: Db) => () =>
+    applyToCollection<DeleteWriteOpResultObject>(
+      collection,
+      deleteO<T>(query)
+    )(db)
 }
 /**
  *
@@ -25,19 +32,22 @@ function _deleteOne<T extends object>(
  */
 export function deleteOne<T extends object>(
   collection: string,
-  query: FilterQuery<T>,
-): ReaderTaskEither<Db, MongoError, T> {
-  return apFirst(_deleteOne<T>(collection, query))(findOne<T>(collection, query))
+  query: FilterQuery<T>
+): ReaderTaskEither<Db, MongoError, T | null> {
+  return apFirst(_deleteOne<T>(collection, query))(
+    findOne<T>(collection, query)
+  )
 }
 
 function _deleteMany<T extends object>(
   collection: string,
-  query: FilterQuery<T>,
+  query: FilterQuery<T>
 ): ReaderTaskEither<Db, MongoError, DeleteWriteOpResultObject> {
-  return (db: Db) => () => applyToCollection<DeleteWriteOpResultObject>(
-    collection,
-    deleteM<T>(query),
-  )(db)
+  return (db: Db) => () =>
+    applyToCollection<DeleteWriteOpResultObject>(
+      collection,
+      deleteM<T>(query)
+    )(db)
 }
 /**
  *
@@ -46,7 +56,9 @@ function _deleteMany<T extends object>(
  */
 export function deleteMany<T extends object>(
   collection: string,
-  query: FilterQuery<T>,
+  query: FilterQuery<T>
 ): ReaderTaskEither<Db, MongoError, T[]> {
-  return apFirst(_deleteMany<T>(collection, query))(findMany<T>(collection, query))
+  return apFirst(_deleteMany<T>(collection, query))(
+    findMany<T>(collection, query)
+  )
 }

@@ -9,7 +9,7 @@ import { promiseToEither } from './shared'
 
 export const connect = (
   uri: string,
-  options: MongoClientOptions = {},
+  options: MongoClientOptions = {}
 ): TaskEither<MongoError, MongoClient> => {
   return () =>
     promiseToEither(mongoConnect(uri, { useNewUrlParser: true, ...options }))

@@ -39,3 +39,5 @@ deleteOne<T>(collection: string, query: FilterQuery<T>) => ReaderTaskEither<Db, 
 ```js
 deleteMany<T>(collection: string, query: FilterQuery<T>) => ReaderTaskEither<Db, MongoError, T[]>
 ```
+
+This project was bootstrapped with [TSDX](https://github.com/jaredpalmer/tsdx).

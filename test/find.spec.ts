@@ -1,18 +1,17 @@
 import * as mongo from 'mongodb-memory-server'
-import { run } from 'fp-ts/lib/ReaderTaskEither';
-import { fold } from 'fp-ts/lib/Either';
+import { run } from 'fp-ts/lib/ReaderTaskEither'
+import { fold } from 'fp-ts/lib/Either'
 import { Db, connect, MongoClient, MongoError } from 'mongodb'
-import { findOne, findMany } from './find'
+import { findOne, findMany } from '../src/lib/find'
 
-let memoryServer: mongo.MongoMemoryServer = null
-let client: MongoClient = null
-let db: Db = null
+let memoryServer: mongo.MongoMemoryServer
+let client: MongoClient
+let db: Db
 
 async function connectToDatabase() {
-  client = await connect(
-    await memoryServer.getConnectionString(),
-    { useNewUrlParser: true },
-  )
+  client = await connect(await memoryServer.getConnectionString(), {
+    useNewUrlParser: true,
+  })
 
   db = client.db(await memoryServer.getDbName())
 }
@@ -44,10 +43,14 @@ describe('findOne', () => {
     const result = await run(findOne(collection, {}), db)
 
     expect(result._tag).toEqual('Left')
-    expect(() => fold<MongoError, object, any>(
-      err => { throw err },
-      _ => null
-    )(result)).toThrow(MongoError)
+    expect(() =>
+      fold(
+        err => {
+          throw err
+        },
+        _ => null
+      )(result)
+    ).toThrow(MongoError)
     // reconnect to database to not break afterEach reset function
     await connectToDatabase()
   })
@@ -61,9 +64,11 @@ describe('findOne', () => {
 
     const result = await run(findOne(collection, { name: 'testName' }), db)
 
-    fold<MongoError, object, any>(
-      err => { throw err },
-      res => expect(res).toEqual(toBeFound[0]),
+    fold(
+      err => {
+        throw err
+      },
+      res => expect(res).toEqual(toBeFound[0])
     )(result)
   })
 })
@@ -78,10 +83,14 @@ describe('findMany', () => {
     // reconnect to database to not break afterEach reset function
     await connectToDatabase()
     expect(result._tag).toEqual('Left')
-    expect(() => fold<MongoError, object, any>(
-      err => { throw err },
-      _ => null
-    )(result)).toThrow(MongoError)
+    expect(() =>
+      fold(
+        err => {
+          throw err
+        },
+        _ => null
+      )(result)
+    ).toThrow(MongoError)
   })
 
   test('right value should contain all requested documents', async () => {
@@ -95,9 +104,11 @@ describe('findMany', () => {
 
     const result = await run(findMany(collection, { name: 'testName' }), db)
 
-    fold<MongoError, object, any>(
-      err => { throw err },
-      res => expect(res).toEqual(toBeFound),
+    fold(
+      err => {
+        throw err
+      },
+      res => expect(res).toEqual(toBeFound)
     )(result)
   })
 })

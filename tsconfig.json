@@ -1,20 +1,23 @@
 {
+  "include": ["src", "types", "test"],
   "compilerOptions": {
-    "noImplicitAny": true,
-    "removeComments": true,
-    "preserveConstEnums": true,
+    "module": "esnext",
+    "lib": ["dom", "esnext"],
+    "importHelpers": true,
     "declaration": true,
-    "outDir": "dist",
-    "lib": [
-      "es2016",
-      "esnext"
-    ]
-  },
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "**/*.spec.ts"
-  ]
+    "sourceMap": true,
+    "rootDir": "./src",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "moduleResolution": "node",
+    "baseUrl": "./",
+    "paths": {
+      "*": ["src/*", "node_modules/*"]
+    },
+    "jsx": "react",
+    "esModuleInterop": true
+  }
 }

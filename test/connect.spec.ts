@@ -1,9 +1,9 @@
 import * as mongo from 'mongodb-memory-server'
 import { fold } from 'fp-ts/lib/Either'
 import { MongoClient, Db, connect as mongoConnect } from 'mongodb'
-import { connect, getDb } from './connect'
+import { connect, getDb } from '../src/lib/connect'
 
-let memoryServer: mongo.MongoMemoryServer = null
+let memoryServer: mongo.MongoMemoryServer
 
 beforeAll(async () => {
   memoryServer = new mongo.MongoMemoryServer()
@@ -22,8 +22,8 @@ describe('connect', () => {
         err => {
           throw err
         },
-        _ => null,
-      )(result),
+        _ => null
+      )(result)
     ).toThrow()
   })
 
@@ -37,7 +37,7 @@ describe('connect', () => {
       res => {
         expect(res).toBeInstanceOf(MongoClient)
         res.close()
-      },
+      }
     )(result)
   })
 })
@@ -46,7 +46,7 @@ describe('getDb', () => {
   test('should get Db from MongoClient', async () => {
     const client = await mongoConnect(
       await memoryServer.getConnectionString(),
-      { useNewUrlParser: true },
+      { useNewUrlParser: true }
     )
 
     const result = getDb(await memoryServer.getDbName())(client)
