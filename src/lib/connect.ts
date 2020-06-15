@@ -12,7 +12,13 @@ export const connect = (
   options: MongoClientOptions = {}
 ): TaskEither<MongoError, MongoClient> => {
   return () =>
-    promiseToEither(mongoConnect(uri, { useNewUrlParser: true, ...options }))
+    promiseToEither(
+      mongoConnect(uri, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        ...options,
+      })
+    )
 }
 
 export const getDb = (db: string) => (client: MongoClient) => {

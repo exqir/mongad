@@ -11,6 +11,7 @@ let db: Db
 async function connectToDatabase() {
   client = await connect(await memoryServer.getConnectionString(), {
     useNewUrlParser: true,
+    useUnifiedTopology: true,
   })
 
   db = client.db(await memoryServer.getDbName())

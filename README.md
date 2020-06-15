@@ -23,16 +23,14 @@ Mon(g)ad provides two functions for each CRUD operation, one for a single docume
 connect(uri: string, options?: MongoClientOptions }) => TaskEither<MongoError, MongoClient>
 ```
 
-`{ useNewUrlParser: true }` is used a default for `MongoClientOptions`.
+`{ useNewUrlParser: true, useUnifiedTopology: true }` is used a default for `MongoClientOptions`.
 
 Example:
 
 ```js
 import { connect } from 'mongad'
 
-const client = connect('mongodb://localhost', {
-  useUnifiedTopology: true,
-})()
+const client = connect('mongodb://localhost')()
 ```
 
 ### getDb
@@ -49,9 +47,7 @@ Example:
 import { map } from 'fp-ts/lib/TaskEither'
 import { connect, getDb } from 'mongad'
 
-const todosDb = map(getDb('todo_db'))(
-  connect('mongodb://localhost', { useUnifiedTopology: true })
-)()
+const todosDb = map(getDb('todo_db'))(connect('mongodb://localhost'))()
 ```
 
 ### findOne
