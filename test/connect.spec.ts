@@ -15,7 +15,10 @@ afterAll(async () => {
 
 describe('connect', () => {
   test('left value should contain error', async () => {
-    const result = await connect('mongodb://fail')()
+    const result = await connect('mongodb://fail', {
+      // Reduce the timeout, otherwise the test itself would timeout.
+      serverSelectionTimeoutMS: 5,
+    })()
 
     expect(() =>
       fold<Error, object, any>(
@@ -46,7 +49,7 @@ describe('getDb', () => {
   test('should get Db from MongoClient', async () => {
     const client = await mongoConnect(
       await memoryServer.getConnectionString(),
-      { useNewUrlParser: true }
+      { useNewUrlParser: true, useUnifiedTopology: true }
     )
 
     const result = getDb(await memoryServer.getDbName())(client)
