@@ -59,7 +59,7 @@ const todosDb = map(getDb('todo_db'))(
 `findOne` retrives one document matching the query from the collection or null, wraping MongoDB's [findOne](http://mongodb.github.io/node-mongodb-native/3.5/api/Collection.html#findOne).
 
 ```ts
-findOne<T>(collection: string, query: FilterQuery<T>) => ReaderTaskEither<Db, MongoError, T | null>
+findOne<T>(collection: string, query: FilterQuery<T>, options?: FindOneOptions) => ReaderTaskEither<Db, MongoError, T | null>
 ```
 
 Example:
@@ -76,7 +76,7 @@ const todo1 = run(findOne('todos', { _id: '1' }), db)
 `findMany` retrieves an array of documents matching the query from the collection, wrapping MongoDB's [find](http://mongodb.github.io/node-mongodb-native/3.5/api/Collection.html#find).
 
 ```ts
-findMany<T>(collection: string, query: FilterQuery<T>) => ReaderTaskEither<Db, MongoError, T[]>
+findMany<T>(collection: string, query: FilterQuery<T>, options?: FindOneOptions) => ReaderTaskEither<Db, MongoError, T[]>
 ```
 
 Example:
@@ -196,7 +196,7 @@ const removedTodo = run(deleteOne('todos', { _id: '1' }), db)
 deleteMany<T>(collection: string, query: FilterQuery<T>, options?: DeleteManyOptions) => ReaderTaskEither<Db, MongoError, T[]>
 ```
 
-Example:
+Example:, options?: FindOneOptions
 
 ```js
 import { run } from 'fp-ts/lib/ReaderTaskEither'
