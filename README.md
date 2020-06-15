@@ -136,7 +136,7 @@ const newTodos = run(
 `updateOne` updates one document matching the query in the collection with the provided changes and returns the updated document, wrapping MongoDB's [updateOne](http://mongodb.github.io/node-mongodb-native/3.5/api/Collection.html#updateOne).
 
 ```ts
-updateOne<T>(collection: string, query: FilterQuery<T>, update: {}) => ReaderTaskEither<Db, MongoError, T | null>
+updateOne<T>(collection: string, query: FilterQuery<T>, update: Update<T>, options?: UpdateOneOptions) => ReaderTaskEither<Db, MongoError, T | null>
 ```
 
 Example:
@@ -156,7 +156,7 @@ const updatedTodo = run(
 `updateMany` updates all of the documents matching the query in the collection with the provided changes and returns the updated documents as array, wrapping MongoDB's [updateMany](http://mongodb.github.io/node-mongodb-native/3.5/api/Collection.html#updateMany).
 
 ```ts
-updateMany<T>(collection: string, query: FilterQuery<T>, update: {}) => ReaderTaskEither<Db, MongoError, T[]>
+updateMany<T>(collection: string, query: FilterQuery<T>, update: Update<T>, options?: UpdateManyOptions) => ReaderTaskEither<Db, MongoError, T[]>
 ```
 
 Example:

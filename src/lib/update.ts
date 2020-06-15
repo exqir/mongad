@@ -4,28 +4,39 @@ import {
   Collection,
   UpdateWriteOpResult,
   MongoError,
+  UpdateOneOptions,
+  UpdateManyOptions,
+  UpdateQuery,
 } from 'mongodb'
 import { ReaderTaskEither, apSecond } from 'fp-ts/lib/ReaderTaskEither'
 
 import { applyToCollection } from './shared'
 import { findOne, findMany } from './find'
 
-const updateO = <T>(query: FilterQuery<T>, update: {}) => (
-  collection: Collection
-) => collection.updateOne(query, update)
-const updateM = <T>(query: FilterQuery<T>, update: {}) => (
-  collection: Collection
-) => collection.updateMany(query, update)
+type Update<T> = UpdateQuery<T> | Partial<T>
+
+const updateO = <T>(
+  query: FilterQuery<T>,
+  update: Update<T>,
+  options?: UpdateOneOptions
+) => (collection: Collection<T>) => collection.updateOne(query, update, options)
+const updateM = <T>(
+  query: FilterQuery<T>,
+  update: Update<T>,
+  options?: UpdateManyOptions
+) => (collection: Collection<T>) =>
+  collection.updateMany(query, update, options)
 
 function _updateO<T extends object>(
   collection: string,
   query: FilterQuery<T>,
-  update: {}
+  update: Update<T>,
+  options?: UpdateOneOptions
 ): ReaderTaskEither<Db, MongoError, UpdateWriteOpResult> {
   return (db: Db) => () =>
-    applyToCollection<UpdateWriteOpResult>(
+    applyToCollection<T, UpdateWriteOpResult>(
       collection,
-      updateO<T>(query, update)
+      updateO<T>(query, update, options)
     )(db)
 }
 
@@ -38,22 +49,24 @@ function _updateO<T extends object>(
 export function updateOne<T extends object>(
   collection: string,
   query: FilterQuery<T>,
-  update: {}
+  update: Update<T>,
+  options?: UpdateOneOptions
 ): ReaderTaskEither<Db, MongoError, T | null> {
   return apSecond(findOne<T>(collection, query))(
-    _updateO(collection, query, update)
+    _updateO(collection, query, update, options)
   )
 }
 
 function _updateM<T extends object>(
   collection: string,
   query: FilterQuery<T>,
-  update: {}
+  update: Update<T>,
+  options?: UpdateManyOptions
 ): ReaderTaskEither<Db, MongoError, UpdateWriteOpResult> {
   return (db: Db) => () =>
-    applyToCollection<UpdateWriteOpResult>(
+    applyToCollection<T, UpdateWriteOpResult>(
       collection,
-      updateM<T>(query, update)
+      updateM<T>(query, update, options)
     )(db)
 }
 
@@ -66,9 +79,10 @@ function _updateM<T extends object>(
 export function updateMany<T extends object>(
   collection: string,
   query: FilterQuery<T>,
-  update: {}
+  update: Update<T>,
+  options?: UpdateManyOptions
 ): ReaderTaskEither<Db, MongoError, T[]> {
   return apSecond(findMany<T>(collection, query))(
-    _updateM(collection, query, update)
+    _updateM(collection, query, update, options)
   )
 }
