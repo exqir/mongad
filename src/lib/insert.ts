@@ -1,4 +1,12 @@
-import { Db, Collection, MongoError, OptionalId, WithId } from 'mongodb'
+import {
+  Db,
+  Collection,
+  MongoError,
+  OptionalId,
+  WithId,
+  CollectionInsertOneOptions,
+  CollectionInsertManyOptions,
+} from 'mongodb'
 import { ReaderTaskEither } from 'fp-ts/lib/ReaderTaskEither'
 import { map } from 'fp-ts/lib/TaskEither'
 import { pipe } from 'fp-ts/lib/pipeable'
@@ -6,12 +14,16 @@ import { pipe } from 'fp-ts/lib/pipeable'
 import { applyToCollection } from './shared'
 
 // TODO: Type Collections with Generic. However, this might cause errors through falsy type inference
-const insertO = <T extends OptionalId<{}>>(document: T) => (
-  collection: Collection<T>
-) => collection.insertOne(document as OptionalId<T>)
-const insertM = <T extends OptionalId<{}>>(documents: T[]) => (
-  collection: Collection<T>
-) => collection.insertMany(documents as OptionalId<T>[])
+const insertO = <T extends OptionalId<{}>>(
+  document: T,
+  options?: CollectionInsertOneOptions
+) => (collection: Collection<T>) =>
+  collection.insertOne(document as OptionalId<T>, options)
+const insertM = <T extends OptionalId<{}>>(
+  documents: T[],
+  options?: CollectionInsertManyOptions
+) => (collection: Collection<T>) =>
+  collection.insertMany(documents as OptionalId<T>[], options)
 
 /**
  *
@@ -20,11 +32,12 @@ const insertM = <T extends OptionalId<{}>>(documents: T[]) => (
  */
 export function insertOne<T extends OptionalId<{}>>(
   collection: string,
-  document: T
+  document: T,
+  options?: CollectionInsertOneOptions
 ): ReaderTaskEither<Db, MongoError, WithId<T>> {
   return (db: Db) =>
     pipe(
-      () => pipe(db, applyToCollection(collection, insertO(document))),
+      () => pipe(db, applyToCollection(collection, insertO(document, options))),
       map(res => res.ops[0])
     )
 }
@@ -36,11 +49,13 @@ export function insertOne<T extends OptionalId<{}>>(
  */
 export function insertMany<T extends OptionalId<{}>>(
   collection: string,
-  documents: T[]
+  documents: T[],
+  options?: CollectionInsertManyOptions
 ): ReaderTaskEither<Db, MongoError, WithId<T>[]> {
   return (db: Db) =>
     pipe(
-      () => pipe(db, applyToCollection(collection, insertM(documents))),
+      () =>
+        pipe(db, applyToCollection(collection, insertM(documents, options))),
       map(res => res.ops)
     )
 }

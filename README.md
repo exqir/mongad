@@ -93,7 +93,7 @@ const openTodos = run(findMany('todos', { done: false }), db)
 `insertOne` adds the provided document to the collection and returns it including the `_id`, wrapping MongoDB's [insertOne](http://mongodb.github.io/node-mongodb-native/3.5/api/Collection.html#insertOne).
 
 ```ts
-insertOne<T>(collection: string, document: T) => ReaderTaskEither<Db, MongoError, WithId<T>>
+insertOne<T>(collection: string, document: T, options?: CollectionInsertOneOptions) => ReaderTaskEither<Db, MongoError, WithId<T>>
 ```
 
 Example:
@@ -113,7 +113,7 @@ const newTodo = run(
 `insertMany` adds all of the provided documents to the collection and returns them as an array including the `_id`s, wrapping MongoDB's [insertMany](http://mongodb.github.io/node-mongodb-native/3.5/api/Collection.html#insertMany).
 
 ```ts
-insertMany<T>(collection: string, documents: T[]) => ReaderTaskEither<Db, MongoError, T[]>
+insertMany<T>(collection: string, documents: T[], options?: CollectionInsertManyOptions) => ReaderTaskEither<Db, MongoError, T[]>
 ```
 
 Example:
