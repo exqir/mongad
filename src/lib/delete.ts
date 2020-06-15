@@ -4,25 +4,32 @@ import {
   DeleteWriteOpResultObject,
   Collection,
   MongoError,
+  CommonOptions,
 } from 'mongodb'
 import { ReaderTaskEither, apFirst } from 'fp-ts/lib/ReaderTaskEither'
 
 import { applyToCollection } from './shared'
 import { findOne, findMany } from './find'
 
-const deleteO = <T>(query: FilterQuery<T>) => (collection: Collection) =>
-  collection.deleteOne(query)
-const deleteM = <T>(query: FilterQuery<T>) => (collection: Collection) =>
-  collection.deleteMany(query)
+type DeleteOneOptions = CommonOptions & { bypassDocumentValidation?: boolean }
+type DeleteManyOptions = CommonOptions
+
+const deleteO = <T>(query: FilterQuery<T>, options?: DeleteOneOptions) => (
+  collection: Collection<T>
+) => collection.deleteOne(query, options)
+const deleteM = <T>(query: FilterQuery<T>, options?: DeleteManyOptions) => (
+  collection: Collection<T>
+) => collection.deleteMany(query, options)
 
 function _deleteOne<T extends object>(
   collection: string,
-  query: FilterQuery<T>
+  query: FilterQuery<T>,
+  options?: DeleteOneOptions
 ): ReaderTaskEither<Db, MongoError, DeleteWriteOpResultObject> {
   return (db: Db) => () =>
-    applyToCollection<DeleteWriteOpResultObject>(
+    applyToCollection<T, DeleteWriteOpResultObject>(
       collection,
-      deleteO<T>(query)
+      deleteO<T>(query, options)
     )(db)
 }
 /**
@@ -32,21 +39,23 @@ function _deleteOne<T extends object>(
  */
 export function deleteOne<T extends object>(
   collection: string,
-  query: FilterQuery<T>
+  query: FilterQuery<T>,
+  options?: DeleteOneOptions
 ): ReaderTaskEither<Db, MongoError, T | null> {
-  return apFirst(_deleteOne<T>(collection, query))(
+  return apFirst(_deleteOne<T>(collection, query, options))(
     findOne<T>(collection, query)
   )
 }
 
 function _deleteMany<T extends object>(
   collection: string,
-  query: FilterQuery<T>
+  query: FilterQuery<T>,
+  options?: DeleteManyOptions
 ): ReaderTaskEither<Db, MongoError, DeleteWriteOpResultObject> {
   return (db: Db) => () =>
-    applyToCollection<DeleteWriteOpResultObject>(
+    applyToCollection<T, DeleteWriteOpResultObject>(
       collection,
-      deleteM<T>(query)
+      deleteM<T>(query, options)
     )(db)
 }
 /**
@@ -56,9 +65,10 @@ function _deleteMany<T extends object>(
  */
 export function deleteMany<T extends object>(
   collection: string,
-  query: FilterQuery<T>
+  query: FilterQuery<T>,
+  options?: DeleteManyOptions
 ): ReaderTaskEither<Db, MongoError, T[]> {
-  return apFirst(_deleteMany<T>(collection, query))(
+  return apFirst(_deleteMany<T>(collection, query, options))(
     findMany<T>(collection, query)
   )
 }

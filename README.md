@@ -176,7 +176,7 @@ const updatedTodos = run(
 `deleteOne` removes one document matching the query from the collection returning the deleted document, wrapping MongoDB's [deleteOne](http://mongodb.github.io/node-mongodb-native/3.5/api/Collection.html#deleteOne).
 
 ```ts
-deleteOne<T>(collection: string, query: FilterQuery<T>) => ReaderTaskEither<Db, MongoError, T | null>
+deleteOne<T>(collection: string, query: FilterQuery<T>, options?: DeleteOneOptions) => ReaderTaskEither<Db, MongoError, T | null>
 ```
 
 Example:
@@ -193,7 +193,7 @@ const removedTodo = run(deleteOne('todos', { _id: '1' }), db)
 `deleteOne` removes all documents matching the query from the collection returning the deleted documents as an array, wrapping MongoDB's [deleteMany](http://mongodb.github.io/node-mongodb-native/3.5/api/Collection.html#deleteMany).
 
 ```ts
-deleteMany<T>(collection: string, query: FilterQuery<T>) => ReaderTaskEither<Db, MongoError, T[]>
+deleteMany<T>(collection: string, query: FilterQuery<T>, options?: DeleteManyOptions) => ReaderTaskEither<Db, MongoError, T[]>
 ```
 
 Example:
