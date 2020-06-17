@@ -8,7 +8,8 @@ import {
   UpdateManyOptions,
   UpdateQuery,
 } from 'mongodb'
-import { ReaderTaskEither, apSecond } from 'fp-ts/lib/ReaderTaskEither'
+import { pipe } from 'fp-ts/lib/pipeable'
+import { ReaderTaskEither, chain } from 'fp-ts/lib/ReaderTaskEither'
 
 import { applyToCollection } from './shared'
 import { findOne, findMany } from './find'
@@ -52,8 +53,9 @@ export function updateOne<T extends object>(
   update: Update<T>,
   options?: UpdateOneOptions
 ): ReaderTaskEither<Db, MongoError, T | null> {
-  return apSecond(findOne<T>(collection, query))(
-    _updateO(collection, query, update, options)
+  return pipe(
+    _updateO<T>(collection, query, update, options),
+    chain(() => findOne<T>(collection, query))
   )
 }
 
@@ -82,7 +84,8 @@ export function updateMany<T extends object>(
   update: Update<T>,
   options?: UpdateManyOptions
 ): ReaderTaskEither<Db, MongoError, T[]> {
-  return apSecond(findMany<T>(collection, query))(
-    _updateM(collection, query, update, options)
+  return pipe(
+    _updateM<T>(collection, query, update, options),
+    chain(() => findMany<T>(collection, query))
   )
 }

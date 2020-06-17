@@ -6,7 +6,8 @@ import {
   MongoError,
   CommonOptions,
 } from 'mongodb'
-import { ReaderTaskEither, apFirst } from 'fp-ts/lib/ReaderTaskEither'
+import { pipe } from 'fp-ts/lib/pipeable'
+import { ReaderTaskEither, chainFirst } from 'fp-ts/lib/ReaderTaskEither'
 
 import { applyToCollection } from './shared'
 import { findOne, findMany } from './find'
@@ -42,8 +43,9 @@ export function deleteOne<T extends object>(
   query: FilterQuery<T>,
   options?: DeleteOneOptions
 ): ReaderTaskEither<Db, MongoError, T | null> {
-  return apFirst(_deleteOne<T>(collection, query, options))(
-    findOne<T>(collection, query)
+  return pipe(
+    findOne<T>(collection, query),
+    chainFirst(() => _deleteOne<T>(collection, query, options))
   )
 }
 
@@ -68,7 +70,8 @@ export function deleteMany<T extends object>(
   query: FilterQuery<T>,
   options?: DeleteManyOptions
 ): ReaderTaskEither<Db, MongoError, T[]> {
-  return apFirst(_deleteMany<T>(collection, query, options))(
-    findMany<T>(collection, query)
+  return pipe(
+    findMany<T>(collection, query),
+    chainFirst(() => _deleteMany<T>(collection, query, options))
   )
 }
