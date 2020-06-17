@@ -1,4 +1,4 @@
-# Mon(g)ad
+![](/assets/mongad_logo.png)
 
 Mon(g)ad is a thin layer wrapping [MongoDB](https://www.mongodb.com/) CRUD operations in data types from [fp-ts](https://github.com/gcanti/fp-ts).
 
