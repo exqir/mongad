@@ -1,43 +1,17 @@
-import * as mongo from 'mongodb-memory-server'
 import { run } from 'fp-ts/lib/ReaderTaskEither'
 import { fold } from 'fp-ts/lib/Either'
-import { Db, connect, MongoClient, MongoError } from 'mongodb'
+import { MongoError } from 'mongodb'
 import { updateOne, updateMany } from '../src/lib/update'
+import { setupMongo } from './_util'
 
-let memoryServer: mongo.MongoMemoryServer
-let client: MongoClient
-let db: Db
-
-async function connectToDatabase() {
-  client = await connect(await memoryServer.getConnectionString(), {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-
-  db = client.db(await memoryServer.getDbName())
-}
-
-beforeAll(async () => {
-  memoryServer = new mongo.MongoMemoryServer()
-})
-
-afterAll(async () => {
-  await memoryServer.stop()
-})
-
-beforeEach(async () => {
-  await connectToDatabase()
-})
-
-afterEach(async () => {
-  await db.dropDatabase()
-  await client.close()
-})
+const { connectToDatabase, getMongo } = setupMongo()
 
 const collection = 'testCollection'
 
 describe('updateOne', () => {
   test('left value should contain error', async () => {
+    const { db, client } = getMongo()
+
     // close connection to provoke error from mongo
     await client.close()
 
@@ -57,6 +31,8 @@ describe('updateOne', () => {
   })
 
   test('right value should contain the updated document', async () => {
+    const { db } = getMongo()
+
     const obj = { name: 'testName', property: 'testProperty' }
     await db.collection(collection).insertOne(obj)
 
@@ -80,6 +56,8 @@ describe('updateOne', () => {
 
 describe('updateMany', () => {
   test('left value should contain error', async () => {
+    const { db, client } = getMongo()
+
     // close connection to provoke error from mongo
     await client.close()
 
@@ -99,6 +77,8 @@ describe('updateMany', () => {
   })
 
   test('right value should contain all updated documents', async () => {
+    const { db } = getMongo()
+
     const toBeUpdated = [
       { name: 'testName', property: 'testProperty' },
       { name: 'testName', property: 'anotherProperty' },

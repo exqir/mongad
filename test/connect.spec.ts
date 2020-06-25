@@ -1,17 +1,10 @@
-import * as mongo from 'mongodb-memory-server'
 import { fold } from 'fp-ts/lib/Either'
 import { MongoClient, Db, connect as mongoConnect } from 'mongodb'
 import { connect, getDb } from '../src/lib/connect'
+// @ts-ignore
+import { setupMongo } from './_util'
 
-let memoryServer: mongo.MongoMemoryServer
-
-beforeAll(async () => {
-  memoryServer = new mongo.MongoMemoryServer()
-})
-
-afterAll(async () => {
-  await memoryServer.stop()
-})
+const { mongo } = setupMongo({ autoConnect: false })
 
 describe('connect', () => {
   test('left value should contain error', async () => {
@@ -31,7 +24,7 @@ describe('connect', () => {
   })
 
   test('right value should contain the MongoClient', async () => {
-    const result = await connect(await memoryServer.getConnectionString())()
+    const result = await connect(await mongo.getConnectionString())()
 
     fold<Error, MongoClient, any>(
       err => {
@@ -47,12 +40,12 @@ describe('connect', () => {
 
 describe('getDb', () => {
   test('should get Db from MongoClient', async () => {
-    const client = await mongoConnect(
-      await memoryServer.getConnectionString(),
-      { useNewUrlParser: true, useUnifiedTopology: true }
-    )
+    const client = await mongoConnect(await mongo.getConnectionString(), {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    })
 
-    const result = getDb(await memoryServer.getDbName())(client)
+    const result = getDb(await mongo.getDbName())(client)
 
     expect(result).toBeInstanceOf(Db)
   })

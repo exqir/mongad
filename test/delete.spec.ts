@@ -1,43 +1,17 @@
-import * as mongo from 'mongodb-memory-server'
+// import * as mongo from 'mongodb-memory-server'
 import { run } from 'fp-ts/lib/ReaderTaskEither'
 import { fold } from 'fp-ts/lib/Either'
-import { Db, connect, MongoClient, MongoError } from 'mongodb'
+import { MongoError } from 'mongodb'
 import { deleteOne, deleteMany } from '../src/lib/delete'
+import { setupMongo } from './_util'
 
-let memoryServer: mongo.MongoMemoryServer
-let client: MongoClient
-let db: Db
-
-async function connectToDatabase() {
-  client = await connect(await memoryServer.getConnectionString(), {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-
-  db = client.db(await memoryServer.getDbName())
-}
-
-beforeAll(async () => {
-  memoryServer = new mongo.MongoMemoryServer()
-})
-
-afterAll(async () => {
-  await memoryServer.stop()
-})
-
-beforeEach(async () => {
-  await connectToDatabase()
-})
-
-afterEach(async () => {
-  await db.dropDatabase()
-  await client.close()
-})
+const { connectToDatabase, getMongo } = setupMongo()
 
 const collection = 'testCollection'
 
 describe('deleteOne', () => {
   test('left value should contain error', async () => {
+    const { db, client } = getMongo()
     await db.collection(collection).insertMany([
       { name: 'testName', property: 'testProperty' },
       { name: 'some', property: 'none' },
@@ -61,6 +35,8 @@ describe('deleteOne', () => {
   })
 
   test('right value should contain the deleted document', async () => {
+    const { db } = getMongo()
+
     const toBeDeleted = [
       { name: 'testName', property: 'testProperty' },
       { name: 'testName', property: 'anotherProperty' },
@@ -80,6 +56,8 @@ describe('deleteOne', () => {
 
 describe('deleteMany', () => {
   test('left value should contain error', async () => {
+    const { db, client } = getMongo()
+
     await db.collection(collection).insertMany([
       { name: 'testName', property: 'testProperty' },
       { name: 'some', property: 'none' },
@@ -103,6 +81,8 @@ describe('deleteMany', () => {
   })
 
   test('right value should contain all deleted documents', async () => {
+    const { db } = getMongo()
+
     const toBeDeleted = [
       { name: 'testName', property: 'testProperty' },
       { name: 'testName', property: 'anotherProperty' },

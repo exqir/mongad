@@ -1,43 +1,17 @@
-import * as mongo from 'mongodb-memory-server'
 import { run } from 'fp-ts/lib/ReaderTaskEither'
 import { fold } from 'fp-ts/lib/Either'
-import { Db, connect, MongoClient, MongoError } from 'mongodb'
+import { MongoError } from 'mongodb'
 import { insertOne, insertMany } from '../src/lib/insert'
+import { setupMongo } from './_util'
 
-let memoryServer: mongo.MongoMemoryServer
-let client: MongoClient
-let db: Db
-
-async function connectToDatabase() {
-  client = await connect(await memoryServer.getConnectionString(), {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-
-  db = client.db(await memoryServer.getDbName())
-}
-
-beforeAll(async () => {
-  memoryServer = new mongo.MongoMemoryServer()
-})
-
-afterAll(async () => {
-  await memoryServer.stop()
-})
-
-beforeEach(async () => {
-  await connectToDatabase()
-})
-
-afterEach(async () => {
-  await db.dropDatabase()
-  await client.close()
-})
+const { connectToDatabase, getMongo } = setupMongo()
 
 const collection = 'testCollection'
 
 describe('insertOne', () => {
   test('left value should contain error', async () => {
+    const { db, client } = getMongo()
+
     // close connection to provoke error from mongo
     await client.close()
 
@@ -57,6 +31,8 @@ describe('insertOne', () => {
   })
 
   test('right value should contain created document', async () => {
+    const { db } = getMongo()
+
     const obj = { name: 'testName', property: 'testProperty' }
 
     const result = await run(insertOne(collection, obj), db)
@@ -72,6 +48,8 @@ describe('insertOne', () => {
 
 describe('insertMany', () => {
   test('left value should contain error', async () => {
+    const { db, client } = getMongo()
+
     // close connection to provoke error from mongo
     await client.close()
 
@@ -91,6 +69,8 @@ describe('insertMany', () => {
   })
 
   test('right value should contain all the created documents', async () => {
+    const { db } = getMongo()
+
     const toBeInserted = [
       { name: 'testName', property: 'testProperty' },
       { name: 'testName1', property: 'testProperty' },
