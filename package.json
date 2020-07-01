@@ -56,5 +56,6 @@
     "db",
     "monads",
     "functional"
-  ]
+  ],
+  "sideEffects": false
 }
