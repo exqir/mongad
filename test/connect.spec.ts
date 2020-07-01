@@ -1,7 +1,6 @@
 import { fold } from 'fp-ts/lib/Either'
 import { MongoClient, Db, connect as mongoConnect } from 'mongodb'
 import { connect, getDb } from '../src/lib/connect'
-// @ts-ignore
 import { setupMongo } from './_util'
 
 const { mongo } = setupMongo({ autoConnect: false })

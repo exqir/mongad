@@ -1,4 +1,3 @@
-// import * as mongo from 'mongodb-memory-server'
 import { run } from 'fp-ts/lib/ReaderTaskEither'
 import { fold } from 'fp-ts/lib/Either'
 import { MongoError } from 'mongodb'
