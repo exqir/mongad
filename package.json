@@ -1,8 +1,12 @@
 {
+  "name": "mongad",
   "version": "0.2.1",
+  "description": "A monadic wrapper for MongoDB",
   "license": "MIT",
   "main": "dist/index.js",
+  "module": "dist/mongad.esm.js",
   "typings": "dist/index.d.ts",
+  "author": "Malte Sellmer",
   "files": [
     "dist",
     "src"
@@ -17,23 +21,10 @@
     "lint": "tsdx lint",
     "prepare": "tsdx build"
   },
-  "peerDependencies": {
-    "mongodb": "^3.3.3"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/exqir/mongad.git"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "tsdx lint"
-    }
-  },
-  "prettier": {
-    "printWidth": 80,
-    "semi": false,
-    "singleQuote": true,
-    "trailingComma": "es5"
-  },
-  "name": "mongad",
-  "author": "Malte Sellmer",
-  "module": "dist/mongad.esm.js",
   "devDependencies": {
     "husky": "^4.2.5",
     "tsdx": "^0.13.2",
@@ -46,16 +37,26 @@
     "@types/mongodb": "^3.3.7",
     "fp-ts": "^2.1.1"
   },
-  "description": "A monadic wrapper for MongoDB",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/exqir/mongad.git"
+  "peerDependencies": {
+    "mongodb": "^3.3.3"
   },
   "keywords": [
-    "mongo",
+    "mongodb",
     "db",
     "monads",
+    "fp-ts",
     "functional"
   ],
+  "husky": {
+    "hooks": {
+      "pre-commit": "tsdx lint"
+    }
+  },
+  "prettier": {
+    "printWidth": 80,
+    "semi": false,
+    "singleQuote": true,
+    "trailingComma": "es5"
+  },
   "sideEffects": false
 }
