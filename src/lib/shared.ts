@@ -1,7 +1,6 @@
 import { Db, MongoError, Collection, Cursor } from 'mongodb'
-import { Either, left, right } from 'fp-ts/lib/Either'
-import { flow } from 'fp-ts/lib/function'
-
+import { TaskEither, tryCatch } from 'fp-ts/lib/TaskEither'
+import { flow, Lazy, unsafeCoerce } from 'fp-ts/lib/function'
 /**
  * Get collection from Database
  * @param {string} collection Name of collection
@@ -13,12 +12,14 @@ export const getCollection = <T>(collection: string) => (
 ): Collection<T> => db.collection(collection)
 
 /**
- * Takes a Promise of Type `R` and returns an Either with the success value on the right side and a `MongoError` on the left side in case of failure.
- * @param {Promise<R>} p Promise<R>
- * @returns {Either<MongoError, R>} Either<MongoError, R>
+ * Takes a lazy Promise of Type `R` and returns a TaskEither with the success value on the right side and a `MongoError` on the left side in case of failure.
+ * @param {Lazy<Promise<R>>} f Lazy<Promise<R>>
+ * @returns {TaskEither<MongoError, R>} TaskEither<MongoError, R>
  */
-export const promiseToEither = <R>(p: Promise<R>) =>
-  p.then(r => right<MongoError, R>(r)).catch(err => left<MongoError, R>(err))
+export const toTaskEither = <R>(
+  f: Lazy<Promise<R>>
+): TaskEither<MongoError, R> =>
+  tryCatch(f, err => unsafeCoerce<unknown, MongoError>(err))
 
 /**
  * Turns Cursor<T> into a Promise of T[]
@@ -35,14 +36,14 @@ export const toArray = <T>(c: Cursor<T>) => c.toArray()
 export function applyToCollection<C, R = C>(
   collection: string,
   f: (collection: Collection<C>) => Promise<R | null>
-): (db: Db) => Promise<Either<MongoError, R>>
+): (db: Db) => TaskEither<MongoError, R>
 export function applyToCollection<C, R = C>(
   collection: string,
   f: (collection: Collection<C>) => Promise<R[]>
-): (db: Db) => Promise<Either<MongoError, R[]>>
+): (db: Db) => TaskEither<MongoError, R[]>
 export function applyToCollection<C, R = C>(
   collection: string,
   f: (collection: Collection<C>) => Promise<R | R[]>
 ) {
-  return flow(getCollection<C>(collection), f, promiseToEither)
+  return flow(getCollection<C>(collection), f, c => toTaskEither(() => c))
 }

@@ -27,11 +27,10 @@ function _deleteOne<T extends object>(
   query: FilterQuery<T>,
   options?: DeleteOneOptions
 ): ReaderTaskEither<Db, MongoError, DeleteWriteOpResultObject> {
-  return (db: Db) => () =>
-    applyToCollection<T, DeleteWriteOpResultObject>(
-      collection,
-      deleteO<T>(query, options)
-    )(db)
+  return applyToCollection<T, DeleteWriteOpResultObject>(
+    collection,
+    deleteO<T>(query, options)
+  )
 }
 /**
  *
@@ -54,11 +53,10 @@ function _deleteMany<T extends object>(
   query: FilterQuery<T>,
   options?: DeleteManyOptions
 ): ReaderTaskEither<Db, MongoError, DeleteWriteOpResultObject> {
-  return (db: Db) => () =>
-    applyToCollection<T, DeleteWriteOpResultObject>(
-      collection,
-      deleteM<T>(query, options)
-    )(db)
+  return applyToCollection<T, DeleteWriteOpResultObject>(
+    collection,
+    deleteM<T>(query, options)
+  )
 }
 /**
  *
