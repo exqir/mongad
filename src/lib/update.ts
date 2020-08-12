@@ -34,11 +34,10 @@ function _updateO<T extends object>(
   update: Update<T>,
   options?: UpdateOneOptions
 ): ReaderTaskEither<Db, MongoError, UpdateWriteOpResult> {
-  return (db: Db) => () =>
-    applyToCollection<T, UpdateWriteOpResult>(
-      collection,
-      updateO<T>(query, update, options)
-    )(db)
+  return applyToCollection<T, UpdateWriteOpResult>(
+    collection,
+    updateO<T>(query, update, options)
+  )
 }
 
 /**
@@ -65,11 +64,10 @@ function _updateM<T extends object>(
   update: Update<T>,
   options?: UpdateManyOptions
 ): ReaderTaskEither<Db, MongoError, UpdateWriteOpResult> {
-  return (db: Db) => () =>
-    applyToCollection<T, UpdateWriteOpResult>(
-      collection,
-      updateM<T>(query, update, options)
-    )(db)
+  return applyToCollection<T, UpdateWriteOpResult>(
+    collection,
+    updateM<T>(query, update, options)
+  )
 }
 
 /**

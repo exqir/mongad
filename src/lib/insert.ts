@@ -9,9 +9,9 @@ import {
 } from 'mongodb'
 import { ReaderTaskEither } from 'fp-ts/lib/ReaderTaskEither'
 import { map } from 'fp-ts/lib/TaskEither'
-import { pipe } from 'fp-ts/lib/pipeable'
 
 import { applyToCollection } from './shared'
+import { flow } from 'fp-ts/lib/function'
 
 // TODO: Type Collections with Generic. However, this might cause errors through falsy type inference
 const insertO = <T extends OptionalId<{}>>(
@@ -35,11 +35,10 @@ export function insertOne<T extends OptionalId<{}>>(
   document: T,
   options?: CollectionInsertOneOptions
 ): ReaderTaskEither<Db, MongoError, WithId<T>> {
-  return (db: Db) =>
-    pipe(
-      () => pipe(db, applyToCollection(collection, insertO(document, options))),
-      map(res => res.ops[0])
-    )
+  return flow(
+    applyToCollection(collection, insertO(document, options)),
+    map(res => res.ops[0])
+  )
 }
 
 /**
@@ -52,10 +51,8 @@ export function insertMany<T extends OptionalId<{}>>(
   documents: T[],
   options?: CollectionInsertManyOptions
 ): ReaderTaskEither<Db, MongoError, WithId<T>[]> {
-  return (db: Db) =>
-    pipe(
-      () =>
-        pipe(db, applyToCollection(collection, insertM(documents, options))),
-      map(res => res.ops)
-    )
+  return flow(
+    applyToCollection(collection, insertM(documents, options)),
+    map(({ ops }) => ops)
+  )
 }

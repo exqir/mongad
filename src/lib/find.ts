@@ -38,8 +38,7 @@ export function findOne<T extends object>(
   query: FilterQuery<T>,
   options?: FindOneOptions
 ): ReaderTaskEither<Db, MongoError, T | null> {
-  return (db: Db) => () =>
-    applyToCollection<T>(collection, findO<T>(query, options))(db)
+  return applyToCollection<T>(collection, findO<T>(query, options))
 }
 
 /**
@@ -63,9 +62,8 @@ export function findMany<T extends object>(
   query: FilterQuery<T>,
   options?: FindOneOptions
 ): ReaderTaskEither<Db, MongoError, T[]> {
-  return (db: Db) => () =>
-    applyToCollection<T>(
-      collection,
-      flow(findM<T>(query, options), toArray)
-    )(db)
+  return applyToCollection<T>(
+    collection,
+    flow(findM<T>(query, options), toArray)
+  )
 }
